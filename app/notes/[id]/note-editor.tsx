@@ -1,8 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import dayjs from 'dayjs'
+import Image from 'next/image'
+import back from "@/app/assets/back.svg"
 
 export function NoteEditor({ note }: { note: any }) {
     const [title, setTitle] = useState(note.title)
@@ -37,18 +41,12 @@ export function NoteEditor({ note }: { note: any }) {
 
         if (res.ok) {
             const newContent = await res.json();
-            // Add formatted date for new content
+
             setContents((prev: any) => [
                 ...prev,
                 {
                     ...newContent,
-                    updated_at_fmt: new Date().toLocaleDateString('en-US', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })
+                    updated_at_fmt: dayjs(newContent.updated_at).format('DD MMM YYYY HH:mm')
                 }
             ]);
             setNewBody('');
@@ -59,13 +57,18 @@ export function NoteEditor({ note }: { note: any }) {
 
     return (
         <div className="space-y-6">
-            <div>
-                <Input className='h-12 placeholder:text-xl text-xl focus:text-xl w-full md:w-1/2'
+            <div className='flex items-center'>
+                <Button variant={'link'}>
+                    <Link href="/notes">
+                        <Image src={back} alt="Back to Notes" width={20} height={20} />
+                    </Link>
+                </Button>
+                <Input
+                    className='h-12 placeholder:text-xl text-xl font-bold focus:text-xl w-full md:w-1/2 px-0'
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     onBlur={handleUpdateTitle}
                 />
-
             </div>
 
             <div>

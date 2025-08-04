@@ -8,7 +8,6 @@ export default async function Page() {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
-    // Sudah login, redirect ke halaman protected
     redirect(pathLogin);
   }
 

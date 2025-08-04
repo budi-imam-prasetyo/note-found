@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: BigInteger } }) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = await createClient()
   const { body } = await req.json()
 

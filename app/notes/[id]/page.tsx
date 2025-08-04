@@ -4,33 +4,40 @@ import { NoteEditor } from './note-editor'
 import dayjs from 'dayjs'
 
 interface NotePageProps {
-    params: { id: string }
+  params: { id: string }
 }
 
+// Optional: avoid caching for per-user dynamic content
+export const dynamic = 'force-dynamic'
+
 export default async function NotePage({ params }: NotePageProps) {
-    const supabase = await createClient()
-    const { id } = params
-    const { data: note } = await supabase
-        .from('notes')
-        .select('*, content(*)')
-        .eq('id', id)
-        .single()
+  const supabase = await createClient()
+  const { id } = params
 
-    if (!note) return redirect('/note')
+  const { data: note, error } = await supabase
+    .from('notes')
+    .select('*, content(*)')
+    .eq('id', id)
+    .single()
 
-    const formattedContent = note.content.map((c: any) => ({
-        ...c,
-        updated_at_fmt: dayjs(c.updated_at).format('DD MMM YYYY HH:mm')
-    }))
+  if (error || !note) {
+    console.error('Failed to fetch note:', error?.message)
+    return redirect('/note')
+  }
 
-    const formattedNote = {
-        ...note,
-        content: formattedContent
-    }
+  const formattedContent = (note.content ?? []).map((c: any) => ({
+    ...c,
+    updated_at_fmt: dayjs(c.updated_at).format('DD MMM YYYY HH:mm')
+  }))
 
-    return (
-        <div className="p-6">
-            <NoteEditor note={formattedNote} />
-        </div>
-    )
+  const formattedNote = {
+    ...note,
+    content: formattedContent
+  }
+
+  return (
+    <div className="p-6">
+      <NoteEditor note={formattedNote} />
+    </div>
+  )
 }
