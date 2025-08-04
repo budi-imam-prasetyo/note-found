@@ -2,15 +2,24 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import dayjs from 'dayjs'
 
+interface Note {
+  id: string
+  title: string
+  created_at: string
+  updated_at: string
+}
+
 export default async function Page() {
   const supabase = await createClient()
-  const { data: notes } = await supabase.from('notes').select()
+
+  const { data } = await supabase.from('notes').select('*')
+  const notes = data as Note[]
 
   if (!notes || notes.length === 0) {
     return <div className="text-center mt-10">No notes found.</div>
   }
 
-  const formattedNotes = notes.map((note: any) => ({
+  const formattedNotes = notes.map((note) => ({
     ...note,
     created_at_fmt: dayjs(note.created_at).format('DD MMM YYYY HH:mm'),
     updated_at_fmt: dayjs(note.updated_at).format('DD MMM YYYY HH:mm'),

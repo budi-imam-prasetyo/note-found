@@ -3,11 +3,22 @@ import { redirect } from 'next/navigation'
 import { NoteEditor } from './note-editor'
 import dayjs from 'dayjs'
 
+interface Content {
+  id: number
+  body: string
+  updated_at: string
+}
+
+interface Note {
+  id: string
+  title: string
+  content: Content[]
+}
+
 interface NotePageProps {
   params: { id: string }
 }
 
-// Optional: avoid caching for per-user dynamic content
 export const dynamic = 'force-dynamic'
 
 export default async function NotePage({ params }: NotePageProps) {
@@ -18,14 +29,14 @@ export default async function NotePage({ params }: NotePageProps) {
     .from('notes')
     .select('*, content(*)')
     .eq('id', id)
-    .single()
+    .single<Note>()
 
   if (error || !note) {
     console.error('Failed to fetch note:', error?.message)
     return redirect('/note')
   }
 
-  const formattedContent = (note.content ?? []).map((c: any) => ({
+  const formattedContent = (note.content ?? []).map((c: Content) => ({
     ...c,
     updated_at_fmt: dayjs(c.updated_at).format('DD MMM YYYY HH:mm')
   }))
