@@ -1,11 +1,16 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest) {
   const supabase = await createClient()
   const { body } = await req.json()
 
-  const { id } = params
+  const url = new URL(req.url)
+  const id = url.pathname.split('/').pop() // ambil [id] dari URL
+
+  if (!id) {
+    return new Response('Invalid ID', { status: 400 })
+  }
 
   const { error } = await supabase
     .from('content')

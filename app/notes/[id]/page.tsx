@@ -1,3 +1,4 @@
+// app/notes/[id]/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { NoteEditor } from './note-editor'
@@ -15,15 +16,18 @@ interface Note {
   content: Content[]
 }
 
-interface NotePageProps {
-  params: { id: string }
-}
-
 export const dynamic = 'force-dynamic'
 
-export default async function NotePage({ params }: NotePageProps) {
+// 1. Accept params as a Promise
+export default async function NotePage({
+  params
+}: {
+  params: Promise<{ id: string }>
+}) {
   const supabase = await createClient()
-  const { id } = params
+
+  // 2. Await the params
+  const { id } = await params
 
   const { data: note, error } = await supabase
     .from('notes')
