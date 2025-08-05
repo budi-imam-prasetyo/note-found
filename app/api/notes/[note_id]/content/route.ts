@@ -13,11 +13,14 @@ export async function POST(req: NextRequest) {
     return new Response('Invalid ID', { status: 400 })
   }
 
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from('content')
-    .insert({ note_id: id, body })
+    .insert({ note_id: id, body, user_id: user?.id }) // tambahkan user_id
     .select()
     .single()
+
 
   return error
     ? new Response(error.message, { status: 500 })

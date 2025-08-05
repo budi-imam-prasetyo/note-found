@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import back from "@/app/assets/back.svg"
+import Loading from './loading'
+
 
 interface Content {
   id: number
@@ -15,19 +17,51 @@ interface Content {
   updated_at_fmt?: string
 }
 
-interface Note {
-  id: string
-  title: string
-  content: Content[]
-}
+// interface Note {
+//   note_id: string
+//   title: string
+//   content: Content[]
+// }
 
-export function NoteEditor({ note }: { note: Note }) {
-  const [title, setTitle] = useState(note.title)
-  const [contents, setContents] = useState<Content[]>(note.content ?? [])
+export function NoteEditor({ noteId }: { noteId: string }) {
+  const [title, setTitle] = useState('')
+  const [contents, setContents] = useState<Content[]>([])
   const [newBody, setNewBody] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch data setelah komponen dimount
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        const res = await fetch(`/api/notes/${noteId}`)
+        const data = await res.json()
+
+        if (!res.ok || !data || !data.content) {
+          setTitle('[Note not found]')
+          setContents([])
+          return
+        }
+        console.log('Fetching note with id:', data.note_id)
+
+
+        setTitle(data.title)
+        setContents(data.content.map((c: Content) => ({
+          ...c,
+          updated_at_fmt: dayjs(c.updated_at).format('DD MMM YYYY HH:mm')
+        })))
+      } catch (error) {
+        console.error('Failed to fetch note:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [noteId])
 
   const handleUpdateTitle = async () => {
-    const res = await fetch(`/api/notes/${note.id}/title`, {
+    const res = await fetch(`/api/notes/${noteId}/title`, {
       method: 'PUT',
       body: JSON.stringify({ title }),
     })
@@ -45,7 +79,7 @@ export function NoteEditor({ note }: { note: Note }) {
   const handleAddContent = async () => {
     if (!newBody.trim()) return
 
-    const res = await fetch(`/api/notes/${note.id}/content`, {
+    const res = await fetch(`/api/notes/${noteId}/content`, {
       method: 'POST',
       body: JSON.stringify({ body: newBody }),
     })
@@ -66,13 +100,19 @@ export function NoteEditor({ note }: { note: Note }) {
     }
   }
 
+  if (isLoading) {
+    return (
+      <Loading />
+    )
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center">
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
         <Link href="/notes">
-          <Button variant="link">
-            <Image src={back} alt="Back to Notes" width={20} height={20} />
-          </Button>
+          {/* <Button variant="link"> */}
+          <Image src={back} alt="Back to Notes" width={20} height={20} />
+          {/* </Button> */}
         </Link>
         <Input
           className="h-12 placeholder:text-xl text-xl font-bold focus:text-xl w-full md:w-1/2 px-0"
@@ -82,9 +122,9 @@ export function NoteEditor({ note }: { note: Note }) {
         />
       </div>
 
-      <div className="space-y-4">
+      <div className="">
         {contents.map((c) => (
-          <div key={c.id} className="flex gap-1 items-center flex-col md:flex-row">
+          <div key={c.id} className="flex items-center flex-col md:flex-row">
             <p className="text-xs font-bold">{c.updated_at_fmt}</p>
             <Input
               type="text"
@@ -94,6 +134,8 @@ export function NoteEditor({ note }: { note: Note }) {
             />
           </div>
         ))}
+      </div>
+      <div>
         <div className="flex gap-2 items-center">
           <Button onClick={handleAddContent}>Add Content</Button>
           <Input
