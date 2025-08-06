@@ -8,7 +8,6 @@ interface Params {
 
 export default async function NotePage({ params }: { params: Promise<Params> }) {
   const { note_id } = await params
-  console.log("NotePage params:", note_id)
 
   return (
     <div className="p-6">

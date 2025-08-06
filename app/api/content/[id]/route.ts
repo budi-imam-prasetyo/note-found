@@ -16,7 +16,7 @@ export async function PUT(req: NextRequest) {
     .from('content')
     .update({
       body,
-      updated_at: new Date().toISOString()
+      updated_at: new Date(Date.now()).toISOString(), // update timestamp
     })
     .eq('id', id)
 

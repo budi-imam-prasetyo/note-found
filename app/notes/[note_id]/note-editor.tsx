@@ -10,20 +10,12 @@ import back from "@/app/assets/back.svg"
 import Loading from './loading'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, CheckCircle } from 'lucide-react'
-
-
 interface Content {
   id: number
   body: string
-  updated_at: string
-  updated_at_fmt?: string
+  created_at: string
+  created_at_fmt?: string
 }
-
-// interface Note {
-//   note_id: string
-//   title: string
-//   content: Content[]
-// }
 
 export function NoteEditor({ noteId }: { noteId: string }) {
   const [alert, setAlert] = useState<{ type: "error" | "success"; message: string } | null>(null)
@@ -31,27 +23,21 @@ export function NoteEditor({ noteId }: { noteId: string }) {
   const [contents, setContents] = useState<Content[]>([])
   const [newBody, setNewBody] = useState('')
   const [isLoading, setIsLoading] = useState(true)
-
-  // Fetch data setelah komponen dimount
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true)
       try {
         const res = await fetch(`/api/notes/${noteId}`)
         const data = await res.json()
-
         if (!res.ok || !data || !data.content) {
           setTitle('[Note not found]')
           setContents([])
           return
         }
-        console.log('Fetching note with id:', data.note_id)
-
-
         setTitle(data.title)
         setContents(data.content.map((c: Content) => ({
           ...c,
-          updated_at_fmt: dayjs(c.updated_at).format('DD MMM YYYY HH:mm')
+          created_at_fmt: dayjs(c.created_at).format('DD MMM YYYY HH:mm')
         })))
       } catch (error) {
         console.error('Failed to fetch note:', error)
@@ -59,7 +45,6 @@ export function NoteEditor({ noteId }: { noteId: string }) {
         setIsLoading(false)
       }
     }
-
     fetchData()
   }, [noteId])
 
@@ -69,7 +54,6 @@ export function NoteEditor({ noteId }: { noteId: string }) {
         method: 'PUT',
         body: JSON.stringify({ title }),
       })
-      // if (!res.ok) alert('Failed to update title')
     } catch {
       setAlert({ type: "error", message: "Failed to update title" })
       setTimeout(() => setAlert(null), 3000)
@@ -82,63 +66,39 @@ export function NoteEditor({ noteId }: { noteId: string }) {
         method: 'PUT',
         body: JSON.stringify({ body }),
       })
-      // if (!res.ok) alert('Failed to update content')
     } catch {
       setAlert({ type: "error", message: "Failed to update content" })
       setTimeout(() => setAlert(null), 3000)
     }
   }
 
-
   const handleAddContent = async () => {
     try {
-      // if (!newBody.trim()) return
-
       const res = await fetch(`/api/notes/${noteId}/content`, {
         method: 'POST',
         body: JSON.stringify({ body: newBody }),
       })
-
-      // if (res.ok) {
       const newContent: Content = await res.json()
 
       setContents((prev) => [
         ...prev,
         {
           ...newContent,
-          updated_at_fmt: dayjs(newContent.updated_at).format('DD MMM YYYY HH:mm'),
         },
       ])
       setNewBody('')
-      // } else {
-      //   alert('Failed to add content')
-      // }
+
     } catch {
       setAlert({ type: "error", message: "Failed to add content" })
       setTimeout(() => setAlert(null), 3000)
     }
   }
 
-  // const router = useRouter()
-
-  // useEffect(() => {
-  //   return () => {
-  //     // Jangan hapus kalau masih loading (belum selesai ambil data)
-  //     if (isLoading) return
-
-  //     const isEmptyTitle = title.trim() === ''
-  //     const isEmptyContent = contents.length === 0
-
-  //     if (isEmptyTitle && isEmptyContent) {
-  //       fetch(`/api/notes/${noteId}`, {
-  //         method: 'DELETE',
-  //       }).catch((err) => console.error('Failed to auto-delete note:', err))
-  //     }
-  //   }
-  // }, [title, contents, isLoading, noteId])
-  const groupedByDate = contents.reduce((acc, item) => {
-    const dateKey = dayjs(item.updated_at).format('DD-MM-YYYY')
-    const time = dayjs(item.updated_at).format('HH.mm')
+const groupedByDate = [...contents]
+  .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) // sort ascending
+  .reduce((acc, item) => {
+    const dateKey = dayjs(item.created_at).format('DD-MM-YYYY')
+    const time = dayjs(item.created_at).format('HH.mm')
 
     if (!acc[dateKey]) acc[dateKey] = []
 
@@ -149,7 +109,6 @@ export function NoteEditor({ noteId }: { noteId: string }) {
 
     return acc
   }, {} as Record<string, (Content & { time: string })[]>)
-
 
 
   if (isLoading) {
@@ -173,7 +132,6 @@ export function NoteEditor({ noteId }: { noteId: string }) {
           onBlur={handleUpdateTitle}
         />
       </div>
-
       {/* Alert */}
       {alert && (
         <Alert variant={alert.type === "error" ? "destructive" : "default"}>
@@ -181,7 +139,6 @@ export function NoteEditor({ noteId }: { noteId: string }) {
           <AlertDescription>{alert.message}</AlertDescription>
         </Alert>
       )}
-
       {/* Konten dikelompokkan berdasarkan tanggal */}
       <div className="space-y-4">
         {Object.entries(groupedByDate).map(([date, items]) => (
