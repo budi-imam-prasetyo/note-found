@@ -35,9 +35,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ note
 
 // import { NextRequest, NextResponse } from 'next/server'
 
-export async function DELETE(request: NextRequest, { params }: { params: { note_id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ note_id: string }> }) {
   const supabase = await createClient()
-  const { note_id } = params
+  const { note_id } = await params
 
   const {
     data: { user },

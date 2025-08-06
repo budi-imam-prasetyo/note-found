@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { NextRequest } from 'next/server'
+// import { NextRequest } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   const supabase = await createClient()
   const {
     data: { user },

@@ -10,7 +10,7 @@ import Image from 'next/image'
 import back from "@/app/assets/back.svg"
 import Loading from './loading'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle, CheckCircle, Pencil, CalendarIcon } from 'lucide-react'
+import { AlertCircle, CheckCircle, CalendarIcon } from 'lucide-react'
 import {
   ContextMenu,
   ContextMenuContent,

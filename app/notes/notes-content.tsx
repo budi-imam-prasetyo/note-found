@@ -50,23 +50,6 @@ export async function NotesContent() {
             </div>
         )
     }
-    const handleDelete = async (noteId: string) => {
-        const confirmed = confirm("Yakin ingin menghapus catatan ini?")
-        if (!confirmed) return
-
-        const res = await fetch(`/api/notes/${noteId}`, {
-            method: 'DELETE',
-        })
-
-        if (res.ok) {
-            // Refresh halaman atau hapus dari state agar langsung hilang
-            location.reload()
-        } else {
-            const error = await res.json()
-            alert(error.error || "Gagal menghapus catatan.")
-        }
-    }
-
 
     const formattedNotes = notes.map((note) => ({
         ...note,
