@@ -94,7 +94,7 @@ export function NoteEditor({ noteId }: { noteId: string }) {
     try {
       // if (!newBody.trim()) return
 
-      const res = await fetch(`/api/notes/${noteId}/contentm`, {
+      const res = await fetch(`/api/notes/${noteId}/content`, {
         method: 'POST',
         body: JSON.stringify({ body: newBody }),
       })
