@@ -119,6 +119,25 @@ export function NoteEditor({ noteId }: { noteId: string }) {
     }
   }
 
+  // const router = useRouter()
+
+// useEffect(() => {
+//   return () => {
+//     // Jangan hapus kalau masih loading (belum selesai ambil data)
+//     if (isLoading) return
+
+//     const isEmptyTitle = title.trim() === ''
+//     const isEmptyContent = contents.length === 0
+
+//     if (isEmptyTitle && isEmptyContent) {
+//       fetch(`/api/notes/${noteId}`, {
+//         method: 'DELETE',
+//       }).catch((err) => console.error('Failed to auto-delete note:', err))
+//     }
+//   }
+// }, [title, contents, isLoading, noteId])
+
+
   if (isLoading) {
     return (
       <Loading />
@@ -126,52 +145,58 @@ export function NoteEditor({ noteId }: { noteId: string }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Link href="/notes">
-          {/* <Button variant="link"> */}
-          <Image src={back} alt="Back to Notes" width={20} height={20} />
-          {/* </Button> */}
-        </Link>
-        <Input
-          className="h-12 placeholder:text-xl text-xl font-bold focus:text-xl w-full md:w-1/2 px-0"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onBlur={handleUpdateTitle}
-        />
-      </div>
+  <div className="space-y-6 px-4 py-6">
+    {/* Header dengan tombol kembali dan judul */}
+    <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
+      <Link href="/notes" className="shrink-0">
+        <Image src={back} alt="Back to Notes" width={24} height={24} className="hover:opacity-70 transition" />
+      </Link>
+      <Input
+        className="h-12 placeholder:text-2xl text-2xl font-bold focus:text-2xl px-2 w-full"
+        value={title}
+        placeholder="Judul Catatan"
+        onChange={(e) => setTitle(e.target.value)}
+        onBlur={handleUpdateTitle}
+      />
+    </div>
 
-      <div className="relative">
-        {alert && (
-        <Alert variant={alert.type === "error" ? "destructive" : "default"} className="mb-4">
-          {alert.type === "error" ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
-          <AlertDescription>{alert.message}</AlertDescription>
-        </Alert>
-      )}  
-        {contents.map((c) => (
-          <div key={c.id} className="flex items-center flex-col md:flex-row">
-            <p className="text-xs font-bold">{c.updated_at_fmt}</p>
-            <Input
-              type="text"
-              className="w-full md:w-[calc(100%-200px)]"
-              defaultValue={c.body}
-              onBlur={(e) => handleUpdateContent(c.id, e.target.value)}
-            />
-          </div>
-        ))}
-      </div>
-      <div>
-        <div className="flex gap-2 items-center">
-          <Button onClick={handleAddContent}>Add Content</Button>
+    {/* Alert */}
+    {alert && (
+      <Alert variant={alert.type === "error" ? "destructive" : "default"}>
+        {alert.type === "error" ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+        <AlertDescription>{alert.message}</AlertDescription>
+      </Alert>
+    )}
+
+    {/* Konten yang sudah ada */}
+    <div>
+      {contents.map((c) => (
+        <div key={c.id} className="flex flex-col md:flex-row md:items-center gap-2">
+          <p className="text-sm font-medium text-muted-foreground md:w-40">{c.updated_at_fmt}</p>
           <Input
             type="text"
-            className="w-full md:w-[calc(100%-200px)]"
-            value={newBody}
-            onChange={(e) => setNewBody(e.target.value)}
-            placeholder="Add new content..."
+            className="w-full"
+            defaultValue={c.body}
+            onBlur={(e) => handleUpdateContent(c.id, e.target.value)}
           />
         </div>
-      </div>
+      ))}
     </div>
-  )
+
+    {/* Tambah konten baru */}
+    <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
+      <Button onClick={handleAddContent} className="shrink-0">
+        Tambah Konten
+      </Button>
+      <Input
+        type="text"
+        className="w-full"
+        value={newBody}
+        onChange={(e) => setNewBody(e.target.value)}
+        placeholder="Tambahkan konten baru..."
+      />
+    </div>
+  </div>
+)
+
 }

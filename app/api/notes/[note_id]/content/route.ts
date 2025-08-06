@@ -1,15 +1,11 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, { params }: { params: { note_id: string } }) {
   const supabase = await createClient()
   const { body } = await req.json()
-
-  // Ambil id dari URL
-  const url = new URL(req.url)
-  const id = url.pathname.split('/').slice(-2, -1)[0] // ambil [id] dari "/notes/[id]/content"
-
-  if (!id) {
+  const { note_id } = params
+  if (!note_id) {
     return new Response('Invalid ID', { status: 400 })
   }
 
@@ -17,7 +13,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabase
     .from('content')
-    .insert({ note_id: id, body, user_id: user?.id }) // tambahkan user_id
+    .insert({ note_id: note_id, body, user_id: user?.id }) // tambahkan user_id
     .select()
     .single()
 
