@@ -8,6 +8,8 @@ import dayjs from 'dayjs'
 import Image from 'next/image'
 import back from "@/app/assets/back.svg"
 import Loading from './loading'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertCircle, CheckCircle } from 'lucide-react'
 
 
 interface Content {
@@ -24,6 +26,7 @@ interface Content {
 // }
 
 export function NoteEditor({ noteId }: { noteId: string }) {
+  const [alert, setAlert] = useState<{ type: "error" | "success"; message: string } | null>(null)
   const [title, setTitle] = useState('')
   const [contents, setContents] = useState<Content[]>([])
   const [newBody, setNewBody] = useState('')
@@ -61,30 +64,42 @@ export function NoteEditor({ noteId }: { noteId: string }) {
   }, [noteId])
 
   const handleUpdateTitle = async () => {
-    const res = await fetch(`/api/notes/${noteId}/title`, {
-      method: 'PUT',
-      body: JSON.stringify({ title }),
-    })
-    if (!res.ok) alert('Failed to update title')
+    try {
+      await fetch(`/api/notes/${noteId}/title`, {
+        method: 'PUT',
+        body: JSON.stringify({ title }),
+      })
+      // if (!res.ok) alert('Failed to update title')
+    } catch {
+      setAlert({ type: "error", message: "Failed to update title" })
+      setTimeout(() => setAlert(null), 3000)
+    }
   }
 
   const handleUpdateContent = async (contentId: number, body: string) => {
-    const res = await fetch(`/api/content/${contentId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ body }),
-    })
-    if (!res.ok) alert('Failed to update content')
+    try {
+      await fetch(`/api/content/${contentId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ body }),
+      })
+      // if (!res.ok) alert('Failed to update content')
+    } catch {
+      setAlert({ type: "error", message: "Failed to update content" })
+      setTimeout(() => setAlert(null), 3000)
+    }
   }
 
+
   const handleAddContent = async () => {
-    if (!newBody.trim()) return
+    try {
+      // if (!newBody.trim()) return
 
-    const res = await fetch(`/api/notes/${noteId}/content`, {
-      method: 'POST',
-      body: JSON.stringify({ body: newBody }),
-    })
+      const res = await fetch(`/api/notes/${noteId}/contentm`, {
+        method: 'POST',
+        body: JSON.stringify({ body: newBody }),
+      })
 
-    if (res.ok) {
+      // if (res.ok) {
       const newContent: Content = await res.json()
 
       setContents((prev) => [
@@ -95,8 +110,12 @@ export function NoteEditor({ noteId }: { noteId: string }) {
         },
       ])
       setNewBody('')
-    } else {
-      alert('Failed to add content')
+      // } else {
+      //   alert('Failed to add content')
+      // }
+    } catch {
+      setAlert({ type: "error", message: "Failed to add content" })
+      setTimeout(() => setAlert(null), 3000)
     }
   }
 
@@ -122,7 +141,13 @@ export function NoteEditor({ noteId }: { noteId: string }) {
         />
       </div>
 
-      <div className="">
+      <div className="relative">
+        {alert && (
+        <Alert variant={alert.type === "error" ? "destructive" : "default"} className="mb-4">
+          {alert.type === "error" ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+          <AlertDescription>{alert.message}</AlertDescription>
+        </Alert>
+      )}  
         {contents.map((c) => (
           <div key={c.id} className="flex items-center flex-col md:flex-row">
             <p className="text-xs font-bold">{c.updated_at_fmt}</p>
