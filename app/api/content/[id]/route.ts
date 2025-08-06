@@ -11,6 +11,13 @@ export async function PUT(req: NextRequest) {
   if (!id) {
     return new Response('Invalid ID', { status: 400 })
   }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 })
+  }
+
 
   const { error } = await supabase
     .from('content')
@@ -19,6 +26,7 @@ export async function PUT(req: NextRequest) {
       updated_at: new Date(Date.now()).toISOString(), // update timestamp
     })
     .eq('id', id)
+    .eq("user_id", user.id)
 
   return error
     ? new Response(error.message, { status: 500 })
