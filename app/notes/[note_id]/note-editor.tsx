@@ -121,21 +121,35 @@ export function NoteEditor({ noteId }: { noteId: string }) {
 
   // const router = useRouter()
 
-// useEffect(() => {
-//   return () => {
-//     // Jangan hapus kalau masih loading (belum selesai ambil data)
-//     if (isLoading) return
+  // useEffect(() => {
+  //   return () => {
+  //     // Jangan hapus kalau masih loading (belum selesai ambil data)
+  //     if (isLoading) return
 
-//     const isEmptyTitle = title.trim() === ''
-//     const isEmptyContent = contents.length === 0
+  //     const isEmptyTitle = title.trim() === ''
+  //     const isEmptyContent = contents.length === 0
 
-//     if (isEmptyTitle && isEmptyContent) {
-//       fetch(`/api/notes/${noteId}`, {
-//         method: 'DELETE',
-//       }).catch((err) => console.error('Failed to auto-delete note:', err))
-//     }
-//   }
-// }, [title, contents, isLoading, noteId])
+  //     if (isEmptyTitle && isEmptyContent) {
+  //       fetch(`/api/notes/${noteId}`, {
+  //         method: 'DELETE',
+  //       }).catch((err) => console.error('Failed to auto-delete note:', err))
+  //     }
+  //   }
+  // }, [title, contents, isLoading, noteId])
+  const groupedByDate = contents.reduce((acc, item) => {
+    const dateKey = dayjs(item.updated_at).format('DD-MM-YYYY')
+    const time = dayjs(item.updated_at).format('HH.mm')
+
+    if (!acc[dateKey]) acc[dateKey] = []
+
+    acc[dateKey].push({
+      ...item,
+      time,
+    })
+
+    return acc
+  }, {} as Record<string, (Content & { time: string })[]>)
+
 
 
   if (isLoading) {
@@ -145,58 +159,66 @@ export function NoteEditor({ noteId }: { noteId: string }) {
   }
 
   return (
-  <div className="space-y-6 px-4 py-6">
-    {/* Header dengan tombol kembali dan judul */}
-    <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-      <Link href="/notes" className="shrink-0">
-        <Image src={back} alt="Back to Notes" width={24} height={24} className="hover:opacity-70 transition" />
-      </Link>
-      <Input
-        className="h-12 placeholder:text-2xl text-2xl font-bold focus:text-2xl px-2 w-full"
-        value={title}
-        placeholder="Judul Catatan"
-        onChange={(e) => setTitle(e.target.value)}
-        onBlur={handleUpdateTitle}
-      />
-    </div>
+    <div className="space-y-6 px-4 py-6">
+      {/* Header dengan tombol kembali dan judul */}
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
+        <Link href="/notes" className="shrink-0">
+          <Image src={back} alt="Back to Notes" width={24} height={24} className="hover:opacity-70 transition" />
+        </Link>
+        <Input
+          className="h-12 placeholder:text-2xl text-2xl font-bold focus:text-2xl px-2 w-full"
+          value={title}
+          placeholder="Judul Catatan"
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={handleUpdateTitle}
+        />
+      </div>
 
-    {/* Alert */}
-    {alert && (
-      <Alert variant={alert.type === "error" ? "destructive" : "default"}>
-        {alert.type === "error" ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
-        <AlertDescription>{alert.message}</AlertDescription>
-      </Alert>
-    )}
+      {/* Alert */}
+      {alert && (
+        <Alert variant={alert.type === "error" ? "destructive" : "default"}>
+          {alert.type === "error" ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+          <AlertDescription>{alert.message}</AlertDescription>
+        </Alert>
+      )}
 
-    {/* Konten yang sudah ada */}
-    <div>
-      {contents.map((c) => (
-        <div key={c.id} className="flex flex-col md:flex-row md:items-center gap-2">
-          <p className="text-sm font-medium text-muted-foreground md:w-40">{c.updated_at_fmt}</p>
-          <Input
-            type="text"
-            className="w-full"
-            defaultValue={c.body}
-            onBlur={(e) => handleUpdateContent(c.id, e.target.value)}
-          />
-        </div>
-      ))}
-    </div>
+      {/* Konten dikelompokkan berdasarkan tanggal */}
+      <div className="space-y-4">
+        {Object.entries(groupedByDate).map(([date, items]) => (
+          <div key={date}>
+            <p className="text-sm font-semibold text-muted-foreground">{date}</p>
+            <div className="space-y-2 pl-7 mt-1">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center gap-3">
+                  <span className="w-[60px] text-xs text-muted-foreground text-end">{item.time}</span>
+                  <Input
+                    type="text"
+                    defaultValue={item.body}
+                    onBlur={(e) => handleUpdateContent(item.id, e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
 
-    {/* Tambah konten baru */}
-    <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
-      <Button onClick={handleAddContent} className="shrink-0">
-        Tambah Konten
-      </Button>
-      <Input
-        type="text"
-        className="w-full"
-        value={newBody}
-        onChange={(e) => setNewBody(e.target.value)}
-        placeholder="Tambahkan konten baru..."
-      />
+
+      {/* Tambah konten baru */}
+      <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
+        <Button onClick={handleAddContent} className="shrink-0">
+          Tambah Konten
+        </Button>
+        <Input
+          type="text"
+          className="w-full"
+          value={newBody}
+          onChange={(e) => setNewBody(e.target.value)}
+          placeholder="Tambahkan konten baru..."
+        />
+      </div>
     </div>
-  </div>
-)
+  )
 
 }
