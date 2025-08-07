@@ -13,7 +13,9 @@ export async function AuthButton() {
 
   return user ? (
     <div className="flex items-center gap-4">
+      <p className="hidden md:block">
       Hey, {user.email}!
+      </p>
       <LogoutButton />
     </div>
   ) : (

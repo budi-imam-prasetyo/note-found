@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { DropdownMenuItem, DropdownMenuShortcut } from "@/components/ui/dropdown-menu"
+import { Delete } from "lucide-react"
 
 interface DeleteNoteButtonProps {
   noteId: string
@@ -46,7 +47,9 @@ export function DeleteNoteButton({ noteId }: DeleteNoteButtonProps) {
       <DialogTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           Hapus
-          <DropdownMenuShortcut>⌫</DropdownMenuShortcut>
+          <DropdownMenuShortcut>
+            <Delete />
+          </DropdownMenuShortcut>
         </DropdownMenuItem>
       </DialogTrigger>
 

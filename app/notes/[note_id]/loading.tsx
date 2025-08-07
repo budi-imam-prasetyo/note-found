@@ -1,14 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import back from "@/app/assets/back.svg"
+import { ChevronLeft } from "lucide-react";
 
 
 export default function Loading() {
     return (
         <div className="animate-pulse space-y-6">
             <div className="flex items-center gap-3">
-                <Image src={back} alt="Back to Notes" width={20} height={20} />
+                <ChevronLeft/>
                 <div className="h-10 bg-gray-200/20 rounded w-1/2 ml-4"></div>
             </div>
             <div className="space-y-3">

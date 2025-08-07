@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import dayjs from "dayjs"
-import { LogoutButton } from "@/components/logout-button"
+import { LogoutButton } from "@/components/logout"
 import { Button } from "@/components/ui/button"
 import { ThemeSwitcher } from "@/components/theme-switcher"
-import edit from "@/app/assets/edit.svg"
+import { Menu, Plus } from "lucide-react"
+import NoteFoundLogo from "@/app/assets/note-found-logo.png"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -28,28 +29,11 @@ export async function NotesContent() {
         data: { user },
     } = await supabase.auth.getUser()
 
+    const name = user?.email?.split("@")[0] || "User"
+
     const { data: note } = await supabase.from("notes").select("*").eq("user_id", user?.id)
     const notes = note as Note[]
 
-    if (!notes || notes.length === 0) {
-        return (
-            <div className="space-y-6">
-                <div className="flex justify-between items-center border-b pb-4">
-                    <h1 className="text-2xl font-bold">My Notes</h1>
-                    <div className="flex items-center gap-4">
-                        Hey, {user?.email}!
-                        <LogoutButton />
-                    </div>
-                </div>
-                <div className="text-center mt-10">
-                    <p className="text-muted-foreground mb-4">No notes found.</p>
-                    <form action="api/notes/create" method="post">
-                        <Button type="submit">Tambah Catatan Pertama</Button>
-                    </form>
-                </div>
-            </div>
-        )
-    }
 
     const formattedNotes = notes.map((note) => ({
         ...note,
@@ -59,36 +43,50 @@ export async function NotesContent() {
 
     return (
         <div className="space-y-8 px-4 py-6">
+            {/* Action bar */}
+            <div className="absolute bottom-4 right-4">
+                <form action="api/notes/create" method="post">
+                    <button type="submit" className="bg-white rounded-md p-3 hover:bg-gray-100 shadow-md transition-colors duration-200">
+                        <Plus color="black" size={35} />
+                    </button>
+                </form>
+            </div>
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-center border-b pb-6">
                 <div className="flex items-center gap-4 mb-4 md:mb-0">
+                    <Image src={NoteFoundLogo} alt="note-found-logo" width={50} height={50} />
                     <h1 className="text-3xl font-bold text-center md:text-left mb-4 md:mb-0">Note Found</h1>
                     <ThemeSwitcher />
                 </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <span>Hey, <span className="font-medium text-foreground">{user?.email}</span>!</span>
-                    <LogoutButton />
+                <div className="flex items-center gap-3 text-sm text-muted-foreground group">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <div className="flex items-center gap-2 cursor-pointer select-none">
+                                <p className="font-medium text-foreground capitalize">{name}</p>
+                                <Menu />
+                            </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel className="truncate">Menu</DropdownMenuLabel>
+                            <DropdownMenuGroup>
+                                <LogoutButton />
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
-            </div>
-
-            {/* Action bar */}
-            <div className="flex justify-end">
-                <form action="api/notes/create" method="post">
-                    <Button type="submit" className="shadow">+ Tambah Catatan</Button>
-                </form>
             </div>
 
             {/* Notes grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {formattedNotes.map((note) => (
-                    <div key={note.note_id} className="relative border border-border rounded-xl p-4 bg-background shadow-sm hover:shadow-md transition-all duration-200 h-full hover:brightness-[1.05]">
+                    <div key={note.note_id} className="relative border border-border rounded-xl p-4 bg-background shadow-sm hover:shadow-md transition-all duration-200 h-full hover:brightness-200">
 
                         {/* Dropdown Tombol Edit */}
                         <div className="absolute top-2 right-2 z-10">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="icon" className="w-8 h-8">
-                                        <Image src={edit} alt="Edit" width={16} height={16} />
+                                        <Menu />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-56" align="end">

@@ -6,8 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Calendar } from '@/components/ui/calendar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import dayjs from 'dayjs'
-import Image from 'next/image'
-import back from "@/app/assets/back.svg"
+import { ChevronLeft } from 'lucide-react'
 import Loading from './loading'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, CheckCircle, CalendarIcon } from 'lucide-react'
@@ -109,13 +108,13 @@ export function NoteEditor({ noteId }: { noteId: string }) {
 
       if (response.ok) {
         // Update local state
-        setContents(prev => prev.map(content => 
-          content.id === contentId 
-            ? { 
-                ...content, 
-                created_at: newDateTime.toISOString(),
-                created_at_fmt: newDateTime.format('DD MMM YYYY HH:mm')
-              }
+        setContents(prev => prev.map(content =>
+          content.id === contentId
+            ? {
+              ...content,
+              created_at: newDateTime.toISOString(),
+              created_at_fmt: newDateTime.format('DD MMM YYYY HH:mm')
+            }
             : content
         ))
         setAlert({ type: "success", message: "Date updated successfully" })
@@ -134,7 +133,7 @@ export function NoteEditor({ noteId }: { noteId: string }) {
 
   const handleAddContent = async () => {
     try {
-      const res = await fetch(`/api/notes/${noteId}/content`, {
+      const res = await fetch(`/api/ntes/${noteId}/content`, {
         method: 'POST',
         body: JSON.stringify({ body: newBody }),
       })
@@ -181,10 +180,10 @@ export function NoteEditor({ noteId }: { noteId: string }) {
       {/* Header dengan tombol kembali dan judul */}
       <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
         <Link href="/notes" className="shrink-0">
-          <Image src={back || "/placeholder.svg"} alt="Back to Notes" width={24} height={24} className="hover:opacity-70 transition" />
+          <ChevronLeft />
         </Link>
         <Input
-          className="h-12 placeholder:text-2xl text-2xl font-bold focus:text-2xl px-2 w-full"
+          className="h-12 placeholder:text-2xl text-2xl font-bold focus:text-2xl px-2 w-full "
           value={title}
           placeholder="Judul Catatan"
           onChange={(e) => setTitle(e.target.value)}
@@ -209,7 +208,7 @@ export function NoteEditor({ noteId }: { noteId: string }) {
               {items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
                   <ContextMenu>
-                    <ContextMenuTrigger className="cursor-pointer">
+                    <ContextMenuTrigger className="cursor-pointer select-none">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span className="w-[60px] text-xs text-muted-foreground text-end">{item.time}</span>
@@ -220,7 +219,7 @@ export function NoteEditor({ noteId }: { noteId: string }) {
                       </Tooltip>
                     </ContextMenuTrigger>
                     <ContextMenuContent className="w-52">
-                      <ContextMenuItem 
+                      <ContextMenuItem
                         inset
                         onClick={() => handleChangeDate(item.id)}
                       >
@@ -266,8 +265,8 @@ export function NoteEditor({ noteId }: { noteId: string }) {
       </Dialog>
 
       {/* Tambah konten baru */}
-      <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
-        <Button onClick={handleAddContent} className="shrink-0">
+      <div className="flex flex-col md:flex-row gap-3 items-end md:items-center">
+        <Button onClick={handleAddContent} className="shrink-0 order-1 md:order-0">
           Tambah Konten
         </Button>
         <Input
